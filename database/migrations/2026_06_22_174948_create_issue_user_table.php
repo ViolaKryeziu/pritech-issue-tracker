@@ -12,18 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('issue_user', function (Blueprint $table) {
-            $table->id();
+            $table->foreignId('issue_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
 
-            $table->foreignId('issue_id')
-                ->constrained()
-                ->cascadeOnDelete();
-
-            $table->foreignId('user_id')
-                ->constrained()
-                ->cascadeOnDelete();
+            $table->primary(['issue_id', 'user_id']);
         });
     }
-
     /**
      * Reverse the migrations.
      */
