@@ -2,63 +2,67 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Issue;
+use App\Models\Project;
+use App\Http\Requests\StoreIssueRequest;
+use App\Http\Requests\UpdateIssueRequest;
 
 class IssueController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $issues = Issue::with('project')
+            ->latest()
+            ->paginate(10);
+
+        return view('issues.index', compact('issues'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $projects = Project::orderBy('name')->get();
+
+        return view('issues.create', compact('projects'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(StoreIssueRequest $request)
     {
-        //
+        Issue::create($request->validated());
+
+        return redirect()
+            ->route('issues.index')
+            ->with('success', 'Issue created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Issue $issue)
     {
-        //
+        $issue->load('project');
+
+        return view('issues.show', compact('issue'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(Issue $issue)
     {
-        //
+        $projects = Project::orderBy('name')->get();
+
+        return view('issues.edit', compact('issue', 'projects'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(UpdateIssueRequest $request, Issue $issue)
     {
-        //
+        $issue->update($request->validated());
+
+        return redirect()
+            ->route('issues.index')
+            ->with('success', 'Issue updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Issue $issue)
     {
-        //
+        $issue->delete();
+
+        return redirect()
+            ->route('issues.index')
+            ->with('success', 'Issue deleted successfully.');
     }
 }
