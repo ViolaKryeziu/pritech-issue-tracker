@@ -32,6 +32,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/issues/{issue}/comments', [CommentController::class, 'index']);
     Route::post('/issues/{issue}/comments', [CommentController::class, 'store']);
+
+    Route::post('/issues/{issue}/users/attach', [IssueController::class, 'attachUser']);
+    Route::post('/issues/{issue}/users/detach', [IssueController::class, 'detachUser']);
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

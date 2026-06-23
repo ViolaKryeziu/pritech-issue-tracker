@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Issue;
 use App\Models\Tag;
+use App\Models\User;
 use App\Models\Project;
 use App\Http\Requests\StoreIssueRequest;
 use App\Http\Requests\UpdateIssueRequest;
@@ -13,7 +14,7 @@ class IssueController extends Controller
 {
     public function index(Request $request)
     {
-        $issues = Issue::with(['project', 'tags'])
+        $issues = Issue::with(['project', 'tags', 'users'])
             ->when(
                 $request->status,
                 fn($q) =>
@@ -58,8 +59,9 @@ class IssueController extends Controller
         $issue->load(['project', 'tags']);
 
         $tags = Tag::all();
+        $users = User::all();
 
-        return view('issues.show', compact('issue', 'tags'));
+        return view('issues.show', compact('issue', 'tags', 'users'));
     }
 
     public function edit(Issue $issue)
@@ -83,5 +85,31 @@ class IssueController extends Controller
 
         return redirect()->route('issues.index')
             ->with('success', 'Issue deleted successfully.');
+    }
+
+    public function attachUser(Request $request, Issue $issue)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id'
+        ]);
+
+        $issue->users()->syncWithoutDetaching([$request->user_id]);
+
+        return response()->json([
+            'message' => 'User attached successfully',
+            'user' => User::find($request->user_id)
+        ]);
+    }
+    public function detachUser(Request $request, Issue $issue)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id'
+        ]);
+
+        $issue->users()->detach($request->user_id);
+
+        return response()->json([
+            'message' => 'User detached successfully'
+        ]);
     }
 }
