@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Issue;
+use App\Models\Tag;
 use App\Models\Project;
 use App\Http\Requests\StoreIssueRequest;
 use App\Http\Requests\UpdateIssueRequest;
@@ -12,11 +13,22 @@ class IssueController extends Controller
 {
     public function index(Request $request)
     {
-        $issues = Issue::with('project')
-            ->when($request->status, fn($q) =>
-            $q->where('status', $request->status))
-            ->when($request->priority, fn($q) =>
-            $q->where('priority', $request->priority))
+        $issues = Issue::with(['project', 'tags'])
+            ->when(
+                $request->status,
+                fn($q) =>
+                $q->where('status', $request->status)
+            )
+            ->when(
+                $request->priority,
+                fn($q) =>
+                $q->where('priority', $request->priority)
+            )
+            ->when($request->tag, function ($q) use ($request) {
+                $q->whereHas('tags', function ($t) use ($request) {
+                    $t->where('tags.id', $request->tag);
+                });
+            })
             ->latest()
             ->paginate(10);
 
@@ -37,16 +49,17 @@ class IssueController extends Controller
     {
         Issue::create($request->validated());
 
-        return redirect()
-            ->route('issues.index')
+        return redirect()->route('issues.index')
             ->with('success', 'Issue created successfully.');
     }
 
     public function show(Issue $issue)
     {
-        $issue->load('project');
+        $issue->load(['project', 'tags']);
 
-        return view('issues.show', compact('issue'));
+        $tags = Tag::all();
+
+        return view('issues.show', compact('issue', 'tags'));
     }
 
     public function edit(Issue $issue)
@@ -60,8 +73,7 @@ class IssueController extends Controller
     {
         $issue->update($request->validated());
 
-        return redirect()
-            ->route('issues.index')
+        return redirect()->route('issues.index')
             ->with('success', 'Issue updated successfully.');
     }
 
@@ -69,8 +81,7 @@ class IssueController extends Controller
     {
         $issue->delete();
 
-        return redirect()
-            ->route('issues.index')
+        return redirect()->route('issues.index')
             ->with('success', 'Issue deleted successfully.');
     }
 }

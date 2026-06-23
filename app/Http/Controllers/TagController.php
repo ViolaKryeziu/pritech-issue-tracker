@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tag;
-use Illuminate\Http\Request;
+use App\Models\Issue;
+use App\Http\Requests\StoreTagRequest;
+use App\Http\Requests\AttachTagRequest;
+use App\Http\Requests\DetachTagRequest;
 
 class TagController extends Controller
 {
@@ -13,14 +16,9 @@ class TagController extends Controller
         return view('tags.index', compact('tags'));
     }
 
-    public function store(Request $request)
+    public function store(StoreTagRequest $request)
     {
-        $request->validate([
-            'name' => 'required|unique:tags,name',
-            'color' => 'nullable|string|max:50',
-        ]);
-
-        Tag::create($request->only('name', 'color'));
+        Tag::create($request->validated());
 
         return back()->with('success', 'Tag created successfully');
     }
@@ -28,7 +26,30 @@ class TagController extends Controller
     public function destroy(Tag $tag)
     {
         $tag->delete();
+        return back()->with('success', 'Tag deleted');
+    }
 
-        return back()->with('success', 'Tag deleted successfully');
+    public function all()
+    {
+        return response()->json(Tag::all());
+    }
+
+    public function attach(AttachTagRequest $request, Issue $issue)
+    {
+        $issue->tags()->syncWithoutDetaching([$request->tag_id]);
+
+        return response()->json([
+            'message' => 'Tag attached',
+            'tag' => Tag::find($request->tag_id)
+        ]);
+    }
+
+    public function detach(DetachTagRequest $request, Issue $issue)
+    {
+        $issue->tags()->detach($request->tag_id);
+
+        return response()->json([
+            'message' => 'Tag detached'
+        ]);
     }
 }
