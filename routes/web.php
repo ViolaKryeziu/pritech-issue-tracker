@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\IssueController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +29,9 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/issues/{issue}/tags/attach', [TagController::class, 'attach']);
     Route::post('/issues/{issue}/tags/detach', [TagController::class, 'detach']);
+
+    Route::get('/issues/{issue}/comments', [CommentController::class, 'index']);
+    Route::post('/issues/{issue}/comments', [CommentController::class, 'store']);
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

@@ -2,28 +2,28 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreCommentRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
+            'author_name' => 'required|string|max:50',
+            'body' => 'required|string|max:1000',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'author_name.required' => 'Author name is required',
+            'body.required' => 'Comment body is required',
         ];
     }
 }

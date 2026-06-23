@@ -42,15 +42,58 @@
 
                             {{ $tag->name }}
 
-                            <button onclick="detachTag({{ $tag->id }})"
-                                    class="text-red-600 text-xs">x</button>
+                            <button type="button"
+                                    onclick="detachTag({{ $tag->id }})"
+                                    class="text-red-600 text-xs">
+                                x
+                            </button>
                         </span>
                     @empty
                         <span id="no-tags" class="text-sm text-gray-400">
                             No tags assigned
                         </span>
                     @endforelse
+
                 </div>
+            </div>
+
+            {{-- ================= COMMENTS ================= --}}
+            <div class="mt-8">
+
+                <h3 class="font-bold text-gray-700 mb-3">
+                    Comments
+                </h3>
+
+                {{-- ERROR BOX (REQ: proper validation UI) --}}
+                <div id="comment-errors" class="mb-2 text-red-600 text-sm hidden"></div>
+
+                <form id="commentForm">
+
+                    <input
+                        type="text"
+                        name="author_name"
+                        placeholder="Your name"
+                        class="border rounded p-2 w-full mb-2">
+
+                    <textarea
+                        name="body"
+                        rows="3"
+                        placeholder="Write a comment..."
+                        class="border rounded p-2 w-full"></textarea>
+
+                    <button type="submit"
+                            class="mt-2 px-4 py-2 bg-blue-600 text-black rounded">
+                        Add Comment
+                    </button>
+
+                </form>
+
+                {{-- COMMENTS LIST --}}
+                <div id="comments" class="mt-4"></div>
+
+                {{-- PAGINATION --}}
+                <div id="comment-pagination" class="flex gap-2 mt-4"></div>
+
             </div>
 
             {{-- ACTIONS --}}
@@ -61,7 +104,7 @@
                 </a>
 
                 <a href="{{ route('issues.index') }}"
-                   class="px-4 py-2 bg-gray-600 text-white rounded">
+                   class="px-4 py-2 bg-gray-600 text-black rounded">
                     Back
                 </a>
             </div>
@@ -71,6 +114,11 @@
 
     <script>
         const issueId = {{ $issue->id }};
+
+        let nextPageUrl = null;
+        let prevPageUrl = null;
+
+        /* ================= TAGS ================= */
 
         function attachTag(tagId) {
             if (!tagId) return;
@@ -95,7 +143,11 @@
                 document.getElementById('tag-container').innerHTML += `
                     <span id="tag-${tag.id}" class="px-3 py-1 bg-gray-200 rounded-full text-sm flex items-center gap-2">
                         ${tag.name}
-                        <button onclick="detachTag(${tag.id})" class="text-red-600 text-xs">x</button>
+                        <button type="button"
+                                onclick="detachTag(${tag.id})"
+                                class="text-red-600 text-xs">
+                            x
+                        </button>
                     </span>
                 `;
             });
@@ -118,9 +170,127 @@
 
                 if (!document.querySelector('#tag-container span')) {
                     document.getElementById('tag-container').innerHTML =
-                        `<span class="text-sm text-gray-400">No tags assigned</span>`;
+                        `<span id="no-tags" class="text-sm text-gray-400">
+                            No tags assigned
+                        </span>`;
                 }
             });
         }
+
+        /* ================= COMMENTS ================= */
+
+        loadComments();
+
+        function showErrors(errors)
+        {
+            const box = document.getElementById('comment-errors');
+            box.classList.remove('hidden');
+            box.innerHTML = Object.values(errors).flat().join('<br>');
+        }
+
+        function clearErrors()
+        {
+            const box = document.getElementById('comment-errors');
+            box.classList.add('hidden');
+            box.innerHTML = '';
+        }
+
+        function loadComments(url = `/issues/${issueId}/comments`)
+        {
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+
+                    let html = '';
+
+                    data.comments.forEach(comment => {
+                        html += `
+                            <div class="border rounded p-3 mb-2">
+                                <div class="font-semibold">
+                                    ${comment.author_name}
+                                </div>
+                                <div>
+                                    ${comment.body}
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    document.getElementById('comments').innerHTML = html;
+
+                    nextPageUrl = data.next_page_url;
+                    prevPageUrl = data.prev_page_url;
+
+                    renderPagination();
+                });
+        }
+
+        function renderPagination()
+        {
+            let html = '';
+
+            if (prevPageUrl) {
+                html += `
+                    <button onclick="loadComments('${prevPageUrl}')"
+                            class="px-3 py-1 bg-gray-300 rounded">
+                        Previous
+                    </button>
+                `;
+            }
+
+            if (nextPageUrl) {
+                html += `
+                    <button onclick="loadComments('${nextPageUrl}')"
+                            class="px-3 py-1 bg-gray-300 rounded">
+                        Next
+                    </button>
+                `;
+            }
+
+            document.getElementById('comment-pagination').innerHTML = html;
+        }
+
+        document.getElementById('commentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            clearErrors();
+
+            const formData = new FormData(this);
+
+            fetch(`/issues/${issueId}/comments`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(async res => {
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showErrors(data.errors || { error: ['Something went wrong'] });
+                    return;
+                }
+
+                const comment = data.comment;
+
+                document.getElementById('comments').innerHTML =
+                    `
+                    <div class="border rounded p-3 mb-2">
+                        <div class="font-semibold">
+                            ${comment.author_name}
+                        </div>
+                        <div>
+                            ${comment.body}
+                        </div>
+                    </div>
+                    ` + document.getElementById('comments').innerHTML;
+
+                document.getElementById('commentForm').reset();
+            });
+        });
+
     </script>
 </x-app-layout>
