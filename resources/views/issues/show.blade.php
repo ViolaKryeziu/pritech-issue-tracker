@@ -29,12 +29,12 @@
 
             <div class="mt-6 flex gap-3">
                 <a href="{{ route('issues.edit', $issue) }}"
-                   class="px-4 py-2 bg-yellow-500 text-white rounded">
+                   class="px-4 py-2 bg-yellow-500 text-black rounded">
                     Edit
                 </a>
 
                 <a href="{{ route('issues.index') }}"
-                   class="px-4 py-2 bg-gray-600 text-white rounded">
+                   class="px-4 py-2 bg-gray-600 text-black rounded">
                     Back
                 </a>
             </div>

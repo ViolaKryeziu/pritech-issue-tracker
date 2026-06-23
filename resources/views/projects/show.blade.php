@@ -21,21 +21,21 @@
             <div class="flex justify-between mb-4">
                 <h3 class="text-lg font-bold">Issues</h3>
 
-                <a href="#"
-                   class="px-3 py-1 bg-blue-600 text-white rounded">
+                <a href="{{ route('issues.create', ['project_id' => $project->id]) }}"
+                    class="px-3 py-1 bg-blue-600 text-black rounded">
                     + Add Issue
                 </a>
             </div>
 
             @forelse($project->issues as $issue)
-                <div class="border-b py-2">
-                    <h4 class="font-semibold">{{ $issue->title }}</h4>
-                    <p class="text-sm text-gray-500">
-                        {{ $issue->status }} | {{ $issue->priority }}
-                    </p>
-                </div>
+            <div class="border-b py-2">
+                <h4 class="font-semibold">{{ $issue->title }}</h4>
+                <p class="text-sm text-gray-500">
+                    {{ $issue->status }} | {{ $issue->priority }}
+                </p>
+            </div>
             @empty
-                <p class="text-gray-500">No issues yet</p>
+            <p class="text-gray-500">No issues yet</p>
             @endforelse
 
         </div>

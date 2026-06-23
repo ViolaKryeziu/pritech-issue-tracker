@@ -8,8 +8,8 @@
     <div class="py-8 max-w-2xl mx-auto">
 
         <form method="POST"
-              action="{{ route('issues.store') }}"
-              class="bg-white shadow-md rounded-lg p-6 border border-gray-200">
+            action="{{ route('issues.store') }}"
+            class="bg-white shadow-md rounded-lg p-6 border border-gray-200">
 
             @csrf
 
@@ -24,7 +24,7 @@
                     class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
 
                 @error('title')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -38,7 +38,7 @@
                     class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('description') }}</textarea>
 
                 @error('description')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -52,16 +52,16 @@
                     class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
 
                     @foreach($projects as $project)
-                        <option value="{{ $project->id }}"
-                            @selected(old('project_id') == $project->id)>
-                            {{ $project->name }}
-                        </option>
+                    <option value="{{ $project->id }}"
+                        @selected(old('project_id', $selectedProject ?? null)==$project->id)>
+                        {{ $project->name }}
+                    </option>
                     @endforeach
 
                 </select>
 
                 @error('project_id')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -81,7 +81,7 @@
                 </select>
 
                 @error('status')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -101,7 +101,7 @@
                 </select>
 
                 @error('priority')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -117,7 +117,7 @@
                     class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
 
                 @error('due_date')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
 

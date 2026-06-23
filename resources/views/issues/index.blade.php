@@ -7,15 +7,77 @@
 
     <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-        <div class="mb-4">
+        <div class="mb-4 flex justify-between items-center">
             <a href="{{ route('issues.create') }}"
                class="px-4 py-2 bg-blue-600 text-black rounded">
                 + Create Issue
             </a>
         </div>
 
+        <div class="bg-white shadow rounded p-4 mb-4">
+            <form method="GET"
+                  action="{{ route('issues.index') }}"
+                  class="flex flex-wrap gap-4 items-center">
+
+                <select name="status"
+                        class="border-gray-300 rounded-md shadow-sm">
+                    <option value="">All Statuses</option>
+
+                    <option value="open"
+                        @selected(request('status') === 'open')>
+                        Open
+                    </option>
+
+                    <option value="in_progress"
+                        @selected(request('status') === 'in_progress')>
+                        In Progress
+                    </option>
+
+                    <option value="closed"
+                        @selected(request('status') === 'closed')>
+                        Closed
+                    </option>
+                </select>
+
+                <select name="priority"
+                        class="border-gray-300 rounded-md shadow-sm">
+
+                    <option value="">All Priorities</option>
+
+                    <option value="low"
+                        @selected(request('priority') === 'low')>
+                        Low
+                    </option>
+
+                    <option value="medium"
+                        @selected(request('priority') === 'medium')>
+                        Medium
+                    </option>
+
+                    <option value="high"
+                        @selected(request('priority') === 'high')>
+                        High
+                    </option>
+
+                </select>
+
+                <button type="submit"
+                        class="px-4 py-2 bg-indigo-600 text-black rounded">
+                    Filter
+                </button>
+
+                <a href="{{ route('issues.index') }}"
+                   class="px-4 py-2 bg-gray-500 text-white rounded">
+                    Reset
+                </a>
+
+            </form>
+        </div>
+
         <div class="bg-white shadow rounded p-4">
-            @foreach($issues as $issue)
+
+            @forelse($issues as $issue)
+
                 <div class="border-b py-3 flex justify-between items-center">
 
                     <div>
@@ -24,11 +86,18 @@
                         </h3>
 
                         <p class="text-sm text-gray-500">
-                            {{ $issue->status }} | {{ $issue->priority }}
+                            Project: {{ $issue->project->name }}
+                        </p>
+
+                        <p class="text-sm text-gray-500">
+                            {{ ucfirst(str_replace('_', ' ', $issue->status)) }}
+                            |
+                            {{ ucfirst($issue->priority) }}
                         </p>
                     </div>
 
-                    <div class="flex gap-2">
+                    <div class="flex gap-3">
+
                         <a href="{{ route('issues.show', $issue) }}"
                            class="text-blue-600">
                             View
@@ -39,22 +108,33 @@
                             Edit
                         </a>
 
-                        <form method="POST" action="{{ route('issues.destroy', $issue) }}">
+                        <form method="POST"
+                              action="{{ route('issues.destroy', $issue) }}">
                             @csrf
                             @method('DELETE')
 
-                            <button class="text-red-600">
+                            <button type="submit"
+                                    class="text-red-600">
                                 Delete
                             </button>
                         </form>
+
                     </div>
 
                 </div>
-            @endforeach
+
+            @empty
+
+                <p class="text-gray-500">
+                    No issues found.
+                </p>
+
+            @endforelse
+
         </div>
 
         <div class="mt-4">
-            {{ $issues->links() }}
+            {{ $issues->withQueryString()->links() }}
         </div>
 
     </div>

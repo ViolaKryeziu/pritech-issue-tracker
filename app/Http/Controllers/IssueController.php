@@ -6,23 +6,31 @@ use App\Models\Issue;
 use App\Models\Project;
 use App\Http\Requests\StoreIssueRequest;
 use App\Http\Requests\UpdateIssueRequest;
+use Illuminate\Http\Request;
 
 class IssueController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $issues = Issue::with('project')
+            ->when($request->status, fn($q) =>
+            $q->where('status', $request->status))
+            ->when($request->priority, fn($q) =>
+            $q->where('priority', $request->priority))
             ->latest()
             ->paginate(10);
 
         return view('issues.index', compact('issues'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $projects = Project::orderBy('name')->get();
 
-        return view('issues.create', compact('projects'));
+        return view('issues.create', [
+            'projects' => $projects,
+            'selectedProject' => $request->project_id,
+        ]);
     }
 
     public function store(StoreIssueRequest $request)
