@@ -28,25 +28,33 @@
                         </p>
                     </div>
 
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 items-center">
+
                         <a href="{{ route('projects.show', $project) }}"
                            class="text-blue-600">
                             View
                         </a>
 
-                        <a href="{{ route('projects.edit', $project) }}"
-                           class="text-yellow-600">
-                            Edit
-                        </a>
+                        @can('update', $project)
+                            <a href="{{ route('projects.edit', $project) }}"
+                               class="text-yellow-600">
+                                Edit
+                            </a>
+                        @endcan
 
-                        <form method="POST" action="{{ route('projects.destroy', $project) }}">
-                            @csrf
-                            @method('DELETE')
+                        @can('delete', $project)
+                            <form method="POST"
+                                  action="{{ route('projects.destroy', $project) }}"
+                                  onsubmit="return confirm('Are you sure you want to delete this project?')">
+                                @csrf
+                                @method('DELETE')
 
-                            <button class="text-red-600">
-                                Delete
-                            </button>
-                        </form>
+                                <button type="submit"
+                                        class="text-red-600">
+                                    Delete
+                                </button>
+                            </form>
+                        @endcan
                     </div>
 
                 </div>
